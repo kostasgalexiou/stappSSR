@@ -1,2 +1,2 @@
-# stappSSR
-SSR conversion
+# stappssr
+SSR conversion from numeric to binary format.
