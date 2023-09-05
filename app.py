@@ -158,7 +158,7 @@ def main():
                 )
 
                 new_data = view_all_data(selected_species)
-                new_data2 = sorted([x[0] for x in new_data], key=lambda x:x[0].lower())
+                new_data2 = sorted([x[0] for x in new_data], key=lambda x:x.lower())
                 df = pd.DataFrame(new_data2, columns=["%s markers" % selected_species])
                 st.markdown(
                     "###### Below you the have the updated list of markers in the %s database ######"
@@ -172,17 +172,6 @@ def main():
 
         if not selected_species:
             st.error("Remember to add a species to the database before proceeding!!!!")
-
-        # # ensure that species table has at least one marker present
-        # if (
-        #     c.execute("""SELECT COUNT(*) FROM %s""" % selected_species).fetchone()[0]
-        #     == 0
-        # ):
-        #     st.warning(
-        #         'Your {0} table does not contain any markers. Please run "Add species" from sidebar '
-        #         "menu to add markers for {0}.".format(selected_species)
-        #     )
-        #     exit(0)
         else:
             in_data = st.file_uploader("Upload you data", type=["csv"])
             st.warning(
@@ -209,7 +198,7 @@ def main():
                 convert = st.button("##### Run data conversion #####")
 
                 if convert:
-                    species_alleles2 = [x[0] for x in species_alleles]
+                    species_alleles2 = sorted([x[0] for x in species_alleles], key=lambda x:x.lower())
                     results_df = generate_output(dataf, species_alleles2)
                     st.success("Data conversion completed successfully!")
 

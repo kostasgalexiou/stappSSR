@@ -23,8 +23,6 @@ def generate_output(dframe, alleles_list):
     final_list = [final_column_list]
 
     alleles_dict = dict(zip(alleles_list, np.arange(len(alleles_list))))
-    print(alleles_dict.keys())
-
     for col in dframe_transp.columns:
         binary_list = list()
         binary_list.append(col)
