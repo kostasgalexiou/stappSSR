@@ -80,16 +80,17 @@ def main():
     elif choice == "Species info":
         if len(species_list) != 0:
             lista = list()
+            listb = list()
             for i in species_list:
-                print(i, "species")
                 entries = c.execute("""SELECT * FROM %s""" % i).fetchall()
                 for e in entries:
                     f = list(e)
                     f.append(i)
                     lista.append(f)
+                listb = sorted(lista, key=lambda x:x[0].lower())
 
-            transp_lista = zip(*lista)
-            df = pd.DataFrame.from_records(transp_lista).T
+            transp_listb = zip(*listb)
+            df = pd.DataFrame.from_records(transp_listb).T
             df.columns = ["marker_name", "user", "date introduced", "species"]
             st.write(
                 "Species available in the database, with their corresponding SSR markers:"
@@ -157,7 +158,7 @@ def main():
                 )
 
                 new_data = view_all_data(selected_species)
-                new_data2 = [x[0] for x in new_data]
+                new_data2 = sorted([x[0] for x in new_data], key=lambda x:x[0].lower())
                 df = pd.DataFrame(new_data2, columns=["%s markers" % selected_species])
                 st.markdown(
                     "###### Below you the have the updated list of markers in the %s database ######"
