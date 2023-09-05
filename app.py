@@ -55,25 +55,28 @@ def main():
             "1131/20,-,273,-,...\n\n"
         )
         st.markdown(
-            '<font size="4">\n\n- Species info Track</font>\n\n', unsafe_allow_html=True
+            '<font size="4">\n\n- \"Species info\" Track</font>\n\n', unsafe_allow_html=True
         )
         st.markdown(
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In this track you can see a table with all the "
-            "marker alleles, grouped by species",
+            "marker alleles, grouped by species.",
             unsafe_allow_html=True
         )
         st.markdown(
-            '<font size="4">\n\n- Add new species and/or markers</font>\n\n',
+            '<font size="4">\n\n- \"Add new species and/or markers\" Track</font>\n\n',
             unsafe_allow_html=True,
         )
         st.markdown(
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rerererere",
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;User can either add a new species, "
+            "followed by a set of marker alleles, or add a new marker allele into an existing species database.",
             unsafe_allow_html=True,
         )
         st.markdown(
-            '<p align="left"><font size="4">Points to consider:\n\n'
-            '+ Species available in the database can be seen from "Species Info" at the Sidebar Menu\n'
-            "+ fdsfs</font></p>",
+            '<font size="4">\n\n- \"Format conversion\" Track</font>\n\n',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Conversion of SSR alleles into binary format.",
             unsafe_allow_html=True,
         )
 
