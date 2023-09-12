@@ -29,7 +29,7 @@ def generate_output(dframe, alleles_list):
 
         # generate a dictionary where each allele has a number assigned, starting from 0 to the length of
         # the allele list
-        new_alleles_list = len(alleles_list)*["?"]
+        new_alleles_list = len(alleles_list)*["-"]
         for i,a in enumerate(alleles_list):
             if a.rsplit('_',1)[0] in dframe.columns[1:]:
                 new_alleles_list[i] = '0'
@@ -43,11 +43,11 @@ def generate_output(dframe, alleles_list):
                 if col_entry == "-":
                     #     continue
                     #     # # get the allele list indices that correspond to the marker alleles and replace those positions
-                    #     # # with "?"
+                    #     # # with "-"
                     for allele in alleles_list:
                         result = re.search(r'%s_[0-9]+'%dframe_transp.index[i], allele)
                         if result:
-                            new_alleles_list[alleles_dict[allele]] = '?'
+                            new_alleles_list[alleles_dict[allele]] = '-'
                 else:
                     #     # replace 0 with 1 at the corresponding index of the unique_peak_dict, for the col_entry
                     new_alleles_list[alleles_dict[dframe_transp.index[i]+'_'+str(col_entry)]] = '1'

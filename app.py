@@ -55,15 +55,16 @@ def main():
             "1131/20,-,273,-,...\n\n"
         )
         st.markdown(
-            '<font size="4">\n\n- \"Species info\" Track</font>\n\n', unsafe_allow_html=True
+            '<font size="4">\n\n- "Species info" Track</font>\n\n',
+            unsafe_allow_html=True,
         )
         st.markdown(
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In this track you can see a table with all the "
             "marker alleles, grouped by species.",
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
         st.markdown(
-            '<font size="4">\n\n- \"Add new species and/or markers\" Track</font>\n\n',
+            '<font size="4">\n\n- "Add new species and/or markers" Track</font>\n\n',
             unsafe_allow_html=True,
         )
         st.markdown(
@@ -72,7 +73,7 @@ def main():
             unsafe_allow_html=True,
         )
         st.markdown(
-            '<font size="4">\n\n- \"Format conversion\" Track</font>\n\n',
+            '<font size="4">\n\n- "Format conversion" Track</font>\n\n',
             unsafe_allow_html=True,
         )
         st.markdown(
@@ -90,15 +91,21 @@ def main():
                     f = list(e)
                     f.append(i)
                     lista.append(f)
-                listb = sorted(lista, key=lambda x:x[0].lower())
+                listb = sorted(lista, key=lambda x: x[0].lower())
 
             transp_listb = zip(*listb)
             df = pd.DataFrame.from_records(transp_listb).T
-            df.columns = ["marker_name", "user", "date introduced", "species"]
+            df.columns = ["Marker_name", "User", "Date Added", "Species"]
             st.write(
                 "Species available in the database, with their corresponding SSR markers:"
             )
             st.dataframe(df, hide_index=True)
+
+            st.markdown("#### Download Database ###")
+            FileDownloader(
+                df.to_csv(index=False),
+                filename="markers_in_database",
+            ).download()
         else:
             st.warning(
                 'No species table available. Please run "Add species and/or markers" from sidebar menu to a new '
@@ -161,7 +168,7 @@ def main():
                 )
 
                 new_data = view_all_data(selected_species)
-                new_data2 = sorted([x[0] for x in new_data], key=lambda x:x.lower())
+                new_data2 = sorted([x[0] for x in new_data], key=lambda x: x.lower())
                 df = pd.DataFrame(new_data2, columns=["%s markers" % selected_species])
                 st.markdown(
                     "###### Below you the have the updated list of markers in the %s database ######"
@@ -201,16 +208,19 @@ def main():
                 convert = st.button("##### Run data conversion #####")
 
                 if convert:
-                    species_alleles2 = sorted([x[0] for x in species_alleles], key=lambda x:x.lower())
+                    species_alleles2 = sorted(
+                        [x[0] for x in species_alleles], key=lambda x: x.lower()
+                    )
                     results_df = generate_output(dataf, species_alleles2)
                     st.success("Data conversion completed successfully!")
 
                     with st.expander("##### Converted Data #####"):
                         st.dataframe(results_df)
 
+                    st.markdown("#### Download File ###")
                     FileDownloader(
                         results_df.to_csv(index=False),
-                        filename=in_data.name.split(".")[0],
+                        filename=in_data.name.split(".")[0] + "-binary",
                     ).download()
 
 

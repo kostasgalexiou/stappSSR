@@ -69,7 +69,7 @@ class FileDownloader(object):
 
     def download(self):
         b64 = base64.b64encode(self.data.encode()).decode()
-        new_filename = "{}-binary_{}.csv".format(self.filename, timestr)
-        st.markdown("#### Download File ###")
+        new_filename = "{}_{}.csv".format(self.filename, timestr)
+
         href = f'<a href="data:file/csv;base64,{b64}" download="{new_filename}">Click Here!!</a>'
         st.markdown(href, unsafe_allow_html=True)
