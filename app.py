@@ -1,5 +1,5 @@
 import streamlit as st
-from ssr_conversion import generate_output
+from ssr_conversion import generate_output, generate_output_from_binary
 import streamlit.components.v1 as stc
 from sqlite3_fxns import *
 from fnxns import detect_duplicate_markers
@@ -177,7 +177,8 @@ def main():
                 st.table(df)
 
     elif choice == "Format conversion":
-        st.subheader("Conversion from alleles to binary format")
+
+        st.subheader("Data Conversion")
         selected_species = st.selectbox("Select species of interest", species_list)
 
         if not selected_species:
@@ -205,23 +206,45 @@ def main():
                 with st.expander("##### Check you Input Data #####"):
                     st.dataframe(dataf)
 
-                convert = st.button("##### Run data conversion #####")
+                tochoose = ['numeric-to-binary', 'binary-to-numeric']
 
-                if convert:
-                    species_alleles2 = sorted(
-                        [x[0] for x in species_alleles], key=lambda x: x.lower()
-                    )
-                    results_df = generate_output(dataf, species_alleles2)
-                    st.success("Data conversion completed successfully!")
+                conversion_type = st.radio('Convert to', tochoose, horizontal=True, index=0)
 
-                    with st.expander("##### Converted Data #####"):
-                        st.dataframe(results_df)
+                species_alleles2 = sorted(
+                    [x[0] for x in species_alleles], key=lambda x: x.lower()
+                )
 
-                    st.markdown("#### Download File ###")
-                    FileDownloader(
-                        results_df.to_csv(index=False),
-                        filename=in_data.name.split(".")[0] + "-binary",
-                    ).download()
+                if conversion_type == 'numeric-to-binary':
+                    st.write('Convert marker alleles per line information into allele presence/absence information')
+                    convert = st.button("##### Run data conversion #####")
+                    if convert:
+                        results_df = generate_output(dataf, species_alleles2)
+
+                        st.success("Data conversion completed successfully!")
+                        with st.expander("##### Converted Data #####"):
+                            st.dataframe(results_df)
+
+                        st.markdown("#### Download File ###")
+                        FileDownloader(
+                            results_df.to_csv(index=False),
+                            filename=in_data.name.split(".")[0] + "-binary",
+                        ).download()
+
+                if conversion_type == 'binary-to-numeric':
+                    st.write('Convert allele presence/absence information into marker alleles per line')
+                    convert = st.button("##### Run data conversion #####")
+                    if convert:
+                        results_df = generate_output_from_binary(dframe=dataf, alleles_list=species_alleles2)
+
+                        st.success("Data conversion completed successfully!")
+                        with st.expander("##### Converted Data #####"):
+                            st.dataframe(results_df)
+
+                        st.markdown("#### Download File ###")
+                        FileDownloader(
+                            results_df.to_csv(index=False),
+                            filename=in_data.name.split(".")[0] + "-numeric",
+                        ).download()
 
 
 if __name__ == "__main__":

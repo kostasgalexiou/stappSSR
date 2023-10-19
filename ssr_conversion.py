@@ -10,11 +10,12 @@ import re
 import numpy as np
 import pandas as pd
 import streamlit as st
+from collections import OrderedDict as od
 
 
 def generate_output(dframe, alleles_list):
-    # start building the new dataframe
 
+    # start building the new dataframe
     dframe_transp = dframe.iloc[:,1:].T
     dframe_transp.columns = dframe[dframe.columns[0]]
 
@@ -60,3 +61,91 @@ def generate_output(dframe, alleles_list):
     new_df = new_df.iloc[1:,]
 
     return new_df
+
+def generate_allele_final_list(dframe, dframe_row, marker_dict):
+
+    numeric_list = list()
+    markerset = set()
+    marker_list = []
+
+    # loop over alleles and data frame rows
+    for column, row_elem in zip(dframe.columns[1:], dframe_row[1:]):
+        marker, size = column.rsplit('_', 1)
+        # print(column, row_elem)
+        if marker not in marker_dict.keys():
+            continue
+        if str(row_elem) == '1':
+            # print(column, row_elem)
+            if marker not in markerset:
+                alleles_per_marker = list()
+                markerset.add(marker)
+                marker_list.append(marker)
+
+            alleles_per_marker.append(size)
+            numeric_list.append(alleles_per_marker)
+
+        elif str(row_elem) == '-':
+            if marker not in markerset:
+                alleles_per_marker = list()
+                markerset.add(marker)
+                marker_list.append(marker)
+
+            alleles_per_marker.append('-')
+            numeric_list.append(alleles_per_marker)
+
+    return numeric_list, marker_list
+
+def dict_marker(alleles_list):
+    marker2sizes = od()
+    for i in alleles_list:
+        marker, size = i.rsplit('_', 1)
+
+        if marker not in marker2sizes.keys():
+            size_list = list()
+
+        size_list.append(int(size))
+        marker2sizes[marker] = size_list
+
+    return marker2sizes
+
+def generate_output_from_binary(dframe, alleles_list):
+
+    unique_markers = list(od.fromkeys([x.rsplit('_', 1)[0] for x in alleles_list]))
+
+    numeric_marker_list = ['-'] * (len(unique_markers) + 1)  # line entry plus allele size info per marker
+
+    final_list = list()
+    final_list.append(unique_markers)
+
+    for i in range(len(dframe)):
+
+        dfrow = dframe.iloc[i].to_list()  # get row
+        linename = dfrow[0]
+        numeric_marker_list[0] = linename
+
+        mdict = dict_marker(alleles_list=alleles_list)
+        nlist, mlist = generate_allele_final_list(dframe=dframe, dframe_row=dfrow, marker_dict=mdict)
+
+        #obtain unique list entries
+        x = []
+        for f in nlist:
+            if f not in x:
+                x.append(f)
+
+        #replace numeric_marker_list elements with "-" or allele sizes
+        for m, n in zip(mlist, x):
+            if n[0] == '-':
+                numeric_marker_list[unique_markers.index(m) + 1] = '-'
+            else:
+                numeric_marker_list[unique_markers.index(m) + 1] = '/'.join(n)
+
+        final_list.append(numeric_marker_list)
+        numeric_marker_list = ['-'] * (len(unique_markers) + 1)
+
+    final_list[0].insert(0, 'Lines')
+
+    new_df_sizes = pd.DataFrame(final_list)
+    new_df_sizes.columns = new_df_sizes.iloc[0]
+    new_df_sizes = new_df_sizes.iloc[1:, ]
+
+    return new_df_sizes
