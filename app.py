@@ -44,16 +44,27 @@ def main():
     elif choice == "Help":
         st.markdown(
             '<font size="4">\n\n- Input data is a '
-            "<b>comma-separated (CSV)</b> file where rows represent samples and columns respresent the SSR "
-            "markers. Below you can see an example of input data:</font>\n\n\n",
-            unsafe_allow_html=True,
-        )
+            "<b>comma-separated (CSV)</b> file that can contain 2 types of data, depending on the format conversion "
+            "requested by the user:</font>\n\n", unsafe_allow_html=True)
+
+        st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Input file for <b>numeric-to-binary</b> "
+                    "conversion:", unsafe_allow_html=True)
         st.code(
             "Line,cesi98,cesi976,cesi17,...\n"
             "1124/20,185,273,193,...\n"
             "1125/20,185/191,273,193,...\n"
             "1131/20,-,273,-,...\n\n"
         )
+
+        st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Input file for <b>binary-to-numeric</b> "
+                    "conversion:", unsafe_allow_html=True)
+        st.code(
+            "Line,cesi98_185,cesi98_191,cesi976_273,cesi17_193,...\n"
+            "1124/20,1,0,1,1,...\n"
+            "1125/20,1,1,1,1,...\n"
+            "1131/20,-,-,1,-,...\n\n"
+        )
+
         st.markdown(
             '<font size="4">\n\n- "Species info" Track</font>\n\n',
             unsafe_allow_html=True,
@@ -77,7 +88,9 @@ def main():
             unsafe_allow_html=True,
         )
         st.markdown(
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Conversion of SSR alleles into binary format.",
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Conversion of per-line SSR alleles into allele-based"
+            " binary format (<i>numeric-to-binary</i> option) or allele-based binary format into per-line SSR alleles "
+            "(<i>binary-to-numeric</i> option).",
             unsafe_allow_html=True,
         )
 
