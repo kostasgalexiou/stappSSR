@@ -15,6 +15,7 @@ import streamlit as st
 
 # conn = sqlite3.connect("species.db", check_same_thread=False)
 conn = st.experimental_connection('species_db', type='sql')
+conn
 # c = conn.cursor()
 
 def create_and_populate_table(species_name, infile_df, usern):
