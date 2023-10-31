@@ -7,16 +7,14 @@ Created on Tue Dec  3 08:26:27 2013
 @author: kalexiou
 """
 import base64
-import sqlite3
 import time
+# import sqlite3
 
 timestr = time.strftime("%Y%m%d-%H%M%S")
 import streamlit as st
-import pandas as pd
 
 # conn = sqlite3.connect("species.db", check_same_thread=False)
 conn = st.experimental_connection('species_db', type='sql')
-print(conn, '··········')
 # c = conn.cursor()
 
 def create_and_populate_table(species_name, infile_df, usern):
