@@ -3,6 +3,7 @@ from ssr_conversion import generate_output, generate_output_from_binary
 import streamlit.components.v1 as stc
 from sqlite3_fxns import *
 from fnxns import detect_duplicate_markers
+import pandas as pd
 
 conn = sqlite3.connect("species.db", check_same_thread=False)
 c = conn.cursor()
