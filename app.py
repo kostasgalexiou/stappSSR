@@ -224,7 +224,7 @@ def main():
                 conversion_type = st.radio('Convert to', tochoose, horizontal=True, index=0)
 
                 species_alleles2 = sorted(
-                    [x[0] for x in species_alleles], key=lambda x: x.lower()
+                    [x for x in species_alleles['marker_name'].tolist()], key=lambda x: x.lower()
                 )
 
                 if conversion_type == 'numeric-to-binary':

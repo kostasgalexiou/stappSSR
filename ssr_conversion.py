@@ -67,31 +67,36 @@ def generate_allele_final_list(dframe, dframe_row, marker_dict):
     numeric_list = list()
     markerset = set()
     marker_list = []
+    alleles_per_marker = []
 
-    # loop over alleles and data frame rows
-    for column, row_elem in zip(dframe.columns[1:], dframe_row[1:]):
+    # loop over alleles and data frame rows, excluding line column header and line names
+    for column, row_elem in zip(dframe.columns[1:].tolist(), dframe_row[1:]):
         marker, size = column.rsplit('_', 1)
-        # print(column, row_elem)
+
         if marker not in marker_dict.keys():
             continue
-        if str(row_elem) == '1':
-            # print(column, row_elem)
+
+        elif str(row_elem) == '1':
             if marker not in markerset:
-                alleles_per_marker = list()
                 markerset.add(marker)
                 marker_list.append(marker)
+                alleles_per_marker = list()
+
+            if alleles_per_marker:
+                numeric_list.append(alleles_per_marker)
 
             alleles_per_marker.append(size)
-            numeric_list.append(alleles_per_marker)
 
-        elif str(row_elem) == '-':
+        elif str(row_elem) == '-' or str(row_elem) == '0':
             if marker not in markerset:
-                alleles_per_marker = list()
                 markerset.add(marker)
                 marker_list.append(marker)
+                alleles_per_marker = list()
+
+            if alleles_per_marker:
+                numeric_list.append(alleles_per_marker)
 
             alleles_per_marker.append('-')
-            numeric_list.append(alleles_per_marker)
 
     return numeric_list, marker_list
 
@@ -120,6 +125,7 @@ def generate_output_from_binary(dframe, alleles_list):
     for i in range(len(dframe)):
 
         dfrow = dframe.iloc[i].to_list()  # get row
+
         linename = dfrow[0]
         numeric_marker_list[0] = linename
 
@@ -131,10 +137,9 @@ def generate_output_from_binary(dframe, alleles_list):
         for f in nlist:
             if f not in x:
                 x.append(f)
-
         #replace numeric_marker_list elements with "-" or allele sizes
         for m, n in zip(mlist, x):
-            if n[0] == '-':
+            if set(n) == {'-'}:
                 numeric_marker_list[unique_markers.index(m) + 1] = '-'
             else:
                 numeric_marker_list[unique_markers.index(m) + 1] = '/'.join(n)
