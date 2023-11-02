@@ -5,7 +5,9 @@ from sqlite3_fxns import *
 from fnxns import detect_duplicate_markers
 import pandas as pd
 
-conn = st.experimental_connection('species_db', type='sql')
+print(st.__version__)
+conn = st.connection('species_db', type='sql')
+print(conn.__getattribute__, '$$$$$$$$$$$$$')
 # conn = sqlite3.connect("species.db", check_same_thread=False)
 
 HTML_BANNER = """
@@ -24,8 +26,12 @@ def main():
     command = "SELECT name FROM sqlite_master WHERE type='table';"
     # tables = list(c.execute(command))
     tables_sql = list(conn.query(command))
-    species_list = [x[0] for x in tables_sql]
-
+    print(tables_sql, 'a')
+    if tables_sql[0] == 'name':
+        species_list = []
+    else:
+        species_list = [x[0] for x in tables_sql]
+    print(species_list, 'b')
     menu = [
         "About",
         "Species info",
@@ -100,6 +106,7 @@ def main():
         if len(species_list) != 0:
             lista = list()
             listb = list()
+            print(species_list, '$$$$$$$$$$$$$$$$$$$$')
             for i in species_list:
                 entries = conn.query("""SELECT * FROM %s""" % i)
                 for e in entries:
