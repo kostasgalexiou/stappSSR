@@ -5,9 +5,7 @@ from sqlite3_fxns import *
 from fnxns import detect_duplicate_markers
 import pandas as pd
 
-print(st.__version__)
 conn = st.connection('species_db', type='sql')
-print(conn.__getattribute__, '$$$$$$$$$$$$$')
 # conn = sqlite3.connect("species.db", check_same_thread=False)
 
 HTML_BANNER = """
