@@ -1,12 +1,12 @@
-import streamlit as st
 from ssr_conversion import generate_output, generate_output_from_binary
 import streamlit.components.v1 as stc
-from sqlite3_fxns import *
-from fnxns import detect_duplicate_markers
+from fnxns import *
 import pandas as pd
+from supabase_fxns import *
 
-conn = st.connection('species_db', type='sql')
-# conn = sqlite3.connect("species.db", check_same_thread=False)
+url: str = st.secrets['connections']['supabase']["SUPABASE_URL"]
+key: str = st.secrets['connections']['supabase']["SUPABASE_KEY"]
+supabase: Client = create_client(url, key)
 
 HTML_BANNER = """
     <div style="background-color:#464e5f;padding:10px;border-radius:10px">
@@ -17,19 +17,17 @@ HTML_BANNER = """
 
 def main():
     """SSR Conversion"""
-    # st.title("MetaData Extraction App")
     stc.html(HTML_BANNER)
 
-    # species = [x for x in select_all_tables()[0]]
-    command = "SELECT name FROM sqlite_master WHERE type='table';"
-    # tables = list(c.execute(command))
-    tables_sql = list(conn.query(command))
-    print(tables_sql, 'a')
-    if tables_sql[0] == 'name':
+    alldata_list = view_all_data()
+
+    if not alldata_list:
         species_list = []
+        all_alleles = []
     else:
-        species_list = [x[0] for x in tables_sql]
-    print(species_list, 'b')
+        species_list = list(set([x[2] for x in alldata_list]))
+        all_alleles = list(set([x[1] for x in alldata_list]))
+
     menu = [
         "About",
         "Species info",
@@ -72,6 +70,11 @@ def main():
         )
 
         st.markdown(
+            '<font size="5">\n\nTracks</font>\n\n',
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
             '<font size="4">\n\n- "Species info" Track</font>\n\n',
             unsafe_allow_html=True,
         )
@@ -99,23 +102,31 @@ def main():
             "(<i>binary-to-numeric</i> option).",
             unsafe_allow_html=True,
         )
+        st.markdown(
+            '<font size="5">\n\nData testing</font>\n\n',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<font size="4">\n\n- markers_for_species.csv: input file for adding markers into the database.</font>\n\n',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<font size="4">\n\n- numeric_input.csv: input file for passing SSR allele format into a binary '
+            'format.</font>\n\n',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<font size="4">\n\n- binary_input.csv: input file for passing binary data into an SSR allele '
+            'format.</font>\n\n',
+            unsafe_allow_html=True,
+        )
 
     elif choice == "Species info":
-        if len(species_list) != 0:
-            lista = list()
-            listb = list()
-            print(species_list, '$$$$$$$$$$$$$$$$$$$$')
-            for i in species_list:
-                entries = conn.query("""SELECT * FROM %s""" % i)
-                for e in entries:
-                    f = list(e)
-                    f.append(i)
-                    lista.append(f)
-                listb = sorted(lista, key=lambda x: x[0].lower())
 
-            transp_listb = zip(*listb)
-            df = pd.DataFrame.from_records(transp_listb).T
-            df.columns = ["Marker_name", "User", "Date Added", "Species"]
+        if alldata_list:
+            df = pd.DataFrame(alldata_list)
+            df.columns = ["id", "Marker_name", "Species", "User", "Date_added"]
+
             st.write(
                 "Species available in the database, with their corresponding SSR markers:"
             )
@@ -128,7 +139,7 @@ def main():
             ).download()
         else:
             st.warning(
-                'No species table available. Please run "Add species and/or markers" from sidebar menu to a new '
+                'No species table available. Please run "Add species and/or markers" from sidebar menu to add a new '
                 "species and/or markers for a species."
             )
             exit(0)
@@ -146,55 +157,79 @@ def main():
             new_species = st.text_input(
                 "Introduce the name of the species (Latin name or common name)"
             )
-            alleles_file = st.file_uploader("Upload marker file", type=["txt", "csv"])
+            new_alleles_file = st.file_uploader("Upload marker file", type=["txt", "csv"])
 
-            if alleles_file is not None and new_species is not None:
-                alleles_df = pd.read_csv(alleles_file, header=None)
-                create_and_populate_table(new_species, alleles_df, user)
+            if new_alleles_file is not None and new_species is not None:
+                timestr = time.strftime("%Y-%m-%d")
+                alleles_list = pd.read_csv(new_alleles_file, header=None).values.tolist()
+
+                markerlist = []
+                for i in alleles_list:
+                    markerlist.append({'Marker_name': i[0], 'Species': new_species, 'Person': user, 'Date': timestr})
+
+                for m in markerlist:
+                    supabase.table("speciesDB").insert(m).execute()
+
                 st.success(
                     "%s markers were added to the database correctly"
                     % new_species.upper()
                 )
         else:
-            st.markdown(
-                "##### It looks like that you want to add a new set of markers. Please fill in the information below: #####"
-            )
-            user = st.text_input("Introduce your full name")
-            selected_species = st.selectbox("Select species from list:", species_list)
-            new_marker = st.text_area("Provide new marker(s); one per line")
-            marker_addition = st.button("Add markers")
-
-            if marker_addition:
-                (
-                    common_markers,
-                    new_marker_list,
-                    new_marker_list2,
-                ) = detect_duplicate_markers(new_marker, selected_species)
-
-                if len(common_markers) != 0:
-                    st.write(
-                        "Marker(s) %s already present in the %s database. Ignoring..."
-                        % (common_markers, selected_species)
-                    )
-                    for x in common_markers:
-                        new_marker_list.remove(x)
-                        new_marker_list2 = [[x] for x in new_marker_list]
-                    add_markers(selected_species, new_marker_list2, user)
-                else:
-                    add_markers(selected_species, new_marker_list2, user)
-                st.success(
-                    "Marker(s) %s were added successfully to the %s database"
-                    % (new_marker_list, selected_species.upper())
-                )
-
-                new_data = view_all_data(selected_species)
-                new_data2 = sorted([x[0] for x in new_data], key=lambda x: x.lower())
-                df = pd.DataFrame(new_data2, columns=["%s markers" % selected_species])
+            if not species_list:
+                st.warning(
+                    'You do not have any species and/or markers added. Please add a species and a set of markers by selecting "yes" from above.')
+            else:
                 st.markdown(
-                    "###### Below you the have the updated list of markers in the %s database ######"
-                    % selected_species.upper()
+                    "##### It looks like that you want to add a new set of markers to an existing species. #####"
                 )
-                st.table(df)
+                st.markdown(
+                    "###### Please fill in the information below: ######"
+                )
+
+                user = st.text_input("Introduce your full name")
+                selected_species = st.selectbox("Select species from list:", species_list)
+                new_marker = st.text_area("Provide new marker(s); one per line")
+                marker_addition = st.button("Add markers")
+
+                if marker_addition:
+                    (
+                        common_markers,
+                        new_marker_list
+
+                    ) = detect_duplicate_markers(new_marker, selected_species)
+
+                    if len(common_markers) != 0:
+                        st.write(
+                            "Marker(s) %s already present in the %s database. Ignoring..."
+                            % (common_markers, selected_species)
+                        )
+                        for x in common_markers:
+                            new_marker_list.remove(x)
+
+                        if not new_marker_list:
+                            st.warning('All the provided markers are already present in the database, for the species '
+                                       'selected.\n\n##### No marker is added to the database #####')
+                        else:
+                            add_markers(selected_species, new_marker_list, user)
+                            st.success(
+                                "Marker(s) %s were added successfully to the %s database"
+                                % (new_marker_list, selected_species.upper())
+                            )
+                    else:
+                        add_markers(selected_species, new_marker_list, user)
+                        st.success(
+                            "Marker(s) %s were added successfully to the %s database"
+                            % (new_marker_list, selected_species.upper())
+                        )
+
+                    new_data = view_species_data(selected_species)
+                    new_data2 = sorted([x for x in new_data], key=lambda x: x.lower())
+                    df = pd.DataFrame(new_data2, columns=["%s markers" % selected_species])
+                    st.markdown(
+                        "###### Below you the have the list of markers for %s: ######"
+                        % selected_species.upper()
+                    )
+                    st.table(df)
 
     elif choice == "Format conversion":
 
@@ -211,7 +246,6 @@ def main():
             )
 
             if in_data is not None:
-                species_alleles = view_all_data(selected_species)
                 dataf = pd.read_csv(in_data)
                 rows, columns = list(dataf.shape)
                 st.info(
@@ -230,15 +264,13 @@ def main():
 
                 conversion_type = st.radio('Convert to', tochoose, horizontal=True, index=0)
 
-                species_alleles2 = sorted(
-                    [x for x in species_alleles['marker_name'].tolist()], key=lambda x: x.lower()
-                )
+                ordered_alleles = sorted(all_alleles, key=lambda x: x.lower())
 
                 if conversion_type == 'numeric-to-binary':
                     st.write('Convert marker alleles per line information into allele presence/absence information')
                     convert = st.button("##### Run data conversion #####")
                     if convert:
-                        results_df = generate_output(dataf, species_alleles2)
+                        results_df = generate_output(dataf, ordered_alleles)
 
                         st.success("Data conversion completed successfully!")
                         with st.expander("##### Converted Data #####"):
@@ -254,7 +286,7 @@ def main():
                     st.write('Convert allele presence/absence information into marker alleles per line')
                     convert = st.button("##### Run data conversion #####")
                     if convert:
-                        results_df = generate_output_from_binary(dframe=dataf, alleles_list=species_alleles2)
+                        results_df = generate_output_from_binary(dframe=dataf, alleles_list=ordered_alleles)
 
                         st.success("Data conversion completed successfully!")
                         with st.expander("##### Converted Data #####"):
