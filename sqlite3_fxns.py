@@ -19,13 +19,14 @@ def view_all_data():
     conn = sqlite3.connect('species.sqlite')
     cursor = conn.cursor()
 
-    # Execute SELECT query to fetch all data from the table
-    table_name = 'data'
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
 
-    cursor.execute("SELECT * FROM data")
-    table = cursor.fetchall()
+    # Fetch all table names
+    tables = cursor.fetchall()
 
-    if table:
+    if tables:
+        cursor.execute("SELECT * FROM data")
+        table = cursor.fetchall()
 
         conn.close()
 
