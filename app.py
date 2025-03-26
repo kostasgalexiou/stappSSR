@@ -2,6 +2,7 @@ import streamlit
 from ssr_conversion import generate_output, generate_output_from_binary
 import streamlit.components.v1 as stc
 from fnxns import *
+from sqlite3_fxns import *
 import pandas as pd
 import sqlite3
 
