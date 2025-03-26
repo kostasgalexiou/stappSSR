@@ -12,7 +12,6 @@ from supabase_fxns import *
 
 def detect_duplicate_markers(user_marker, species):
     user_marker_list = user_marker.split("\n")
-
     marker_data = view_species_data(species)
     # data2 = [x[0] for x in data]
 
@@ -22,12 +21,13 @@ def detect_duplicate_markers(user_marker, species):
     return common_marker_list, user_marker_list
 
 
-def add_markers(species, inlist, username):
+def add_markers(species, inlist, username, timestr, connection):
     list_w_data_to_insert = []
     for i in inlist:
-        list_w_data_to_insert.append({'Marker_name': i, 'Species': species, 'Person': username, 'Date': timestr})
+        list_w_data_to_insert.append([i, species, username, timestr])
 
     for m in list_w_data_to_insert:
-        supabase.table("speciesDB").insert(m).execute()
+        query = f"INSERT INTO data (markerid, species, person, uploadDate) VALUES (?, ?, ?, ?)"
+        connection.execute(query, tuple(m))
 
     return

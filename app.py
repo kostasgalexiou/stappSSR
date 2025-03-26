@@ -1,12 +1,10 @@
+import streamlit
 from ssr_conversion import generate_output, generate_output_from_binary
 import streamlit.components.v1 as stc
 from fnxns import *
 import pandas as pd
-from supabase_fxns import *
+import sqlite3
 
-url: str = st.secrets['connections']['supabase']["SUPABASE_URL"]
-key: str = st.secrets['connections']['supabase']["SUPABASE_KEY"]
-supabase: Client = create_client(url, key)
 
 HTML_BANNER = """
     <div style="background-color:#464e5f;padding:10px;border-radius:10px">
@@ -25,8 +23,8 @@ def main():
         species_list = []
         all_alleles = []
     else:
-        species_list = list(set([x[2] for x in alldata_list]))
-        all_alleles = list(set([x[1] for x in alldata_list]))
+        species_list = list(set([x[1] for x in alldata_list]))
+        all_alleles = list(set([x[0] for x in alldata_list]))
 
     menu = [
         "About",
@@ -125,7 +123,7 @@ def main():
 
         if alldata_list:
             df = pd.DataFrame(alldata_list)
-            df.columns = ["id", "Marker_name", "Species", "User", "Date_added"]
+            df.columns = ["Marker_name", "Species", "User", "Date_added"]
 
             st.write(
                 "Species available in the database, with their corresponding SSR markers:"
@@ -145,6 +143,11 @@ def main():
             exit(0)
 
     elif choice == "Add species and/or markers":
+
+        timestr = time.strftime("%Y-%m-%d")
+        conn = sqlite3.connect('species.sqlite')
+        cur = conn.cursor()
+
         st.subheader("Add new species and markers?")
         st.code("Available species in the database: %s" % species_list)
 
@@ -157,23 +160,34 @@ def main():
             new_species = st.text_input(
                 "Introduce the name of the species (Latin name or common name)"
             )
+
             new_alleles_file = st.file_uploader("Upload marker file", type=["txt", "csv"])
 
             if new_alleles_file is not None and new_species is not None:
-                timestr = time.strftime("%Y-%m-%d")
+
+                cur.execute('''CREATE TABLE IF NOT EXISTS data (markerid TEXT, species TEXT,
+                person TEXT, uploadDate TIMESTAMP, UNIQUE(markerid))''')
+
                 alleles_list = pd.read_csv(new_alleles_file, header=None).values.tolist()
 
                 markerlist = []
                 for i in alleles_list:
-                    markerlist.append({'Marker_name': i[0], 'Species': new_species, 'Person': user, 'Date': timestr})
+                    markerlist.append([i[0], new_species, user, timestr])
 
+                skipped_markers = list()
                 for m in markerlist:
-                    supabase.table("speciesDB").insert(m).execute()
+                    try:
+                        query = f"INSERT INTO data (markerid, species, person, uploadDate) VALUES (?, ?, ?, ?)"
+                        cur.execute(query, tuple(m))
+                        conn.commit()
+                    except sqlite3.IntegrityError:
+                        skipped_markers.append(m[0])
 
                 st.success(
-                    "%s markers were added to the database correctly"
-                    % new_species.upper()
+                    "%s markers were added to the database correctly" % new_species.upper()
                 )
+                if len(skipped_markers) > 0:
+                    streamlit.warning('%d markers are already present in the DB and were not added.' % len(skipped_markers))
         else:
             if not species_list:
                 st.warning(
@@ -188,7 +202,7 @@ def main():
 
                 user = st.text_input("Introduce your full name")
                 selected_species = st.selectbox("Select species from list:", species_list)
-                new_marker = st.text_area("Provide new marker(s); one per line")
+                new_markers = st.text_area("Provide new marker(s); one per line")
                 marker_addition = st.button("Add markers")
 
                 if marker_addition:
@@ -196,8 +210,7 @@ def main():
                         common_markers,
                         new_marker_list
 
-                    ) = detect_duplicate_markers(new_marker, selected_species)
-
+                    ) = detect_duplicate_markers(new_markers, selected_species)
                     if len(common_markers) != 0:
                         st.write(
                             "Marker(s) %s already present in the %s database. Ignoring..."
@@ -210,23 +223,23 @@ def main():
                             st.warning('All the provided markers are already present in the database, for the species '
                                        'selected.\n\n##### No marker is added to the database #####')
                         else:
-                            add_markers(selected_species, new_marker_list, user)
+                            add_markers(selected_species, new_marker_list, user, timestr, cur)
                             st.success(
                                 "Marker(s) %s were added successfully to the %s database"
                                 % (new_marker_list, selected_species.upper())
                             )
                     else:
-                        add_markers(selected_species, new_marker_list, user)
+                        add_markers(selected_species, new_marker_list, user, timestr, cur)
                         st.success(
                             "Marker(s) %s were added successfully to the %s database"
                             % (new_marker_list, selected_species.upper())
                         )
 
                     new_data = view_species_data(selected_species)
-                    new_data2 = sorted([x for x in new_data], key=lambda x: x.lower())
+                    new_data2 = sorted([x for x in new_data], key=lambda x: x[0].lower())
                     df = pd.DataFrame(new_data2, columns=["%s markers" % selected_species])
                     st.markdown(
-                        "###### Below you the have the list of markers for %s: ######"
+                        "###### Below you the have the current list of markers for %s: ######"
                         % selected_species.upper()
                     )
                     st.table(df)
@@ -241,7 +254,7 @@ def main():
         else:
             in_data = st.file_uploader("Upload you data", type=["csv"])
             st.warning(
-                "Please make sure that non-utf8 characters are not present in line names "
+                "Please make sure that non-utf8 characters are not present in marker IDs "
                 "(e.g. í, ó, é, á, ñ, etc.)"
             )
 

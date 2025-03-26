@@ -34,7 +34,6 @@ def generate_output(dframe, alleles_list):
                 new_alleles_list[i] = '0'
 
         for i, col_entry in enumerate(dframe_transp[col].to_list()):
-
             if not isinstance(col_entry, int) and col_entry != '-':
                 for c in col_entry.split("/"):
                     new_alleles_list[alleles_dict[dframe_transp.index[i] + '_' + str(c)]] = '1'

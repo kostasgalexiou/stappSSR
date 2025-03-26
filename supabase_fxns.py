@@ -10,36 +10,52 @@ Created on Tue Dec  3 08:26:27 2013
 import streamlit as st
 import base64
 import time
-from supabase import create_client, Client
-
-timestr = time.strftime("%Y-%m-%d")
-
-# Initialize connection.
-url: str = st.secrets['connections']['supabase']["SUPABASE_URL"]
-key: str = st.secrets['connections']['supabase']["SUPABASE_KEY"]
-supabase: Client = create_client(url, key)
+import sqlite3
 
 
 # View Details
 def view_all_data():
-    # get all data from speciesdb table
-    info, count = supabase.table("speciesDB").select("*").execute()
-    all_data = list(info[1])
 
-    data_list = []
-    for d in all_data:
-        data_list.append(list(d.values()))
+    conn = sqlite3.connect('species.sqlite')
+    cursor = conn.cursor()
 
-    return data_list
+    # Execute SELECT query to fetch all data from the table
+    table_name = 'data'
+
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name = ?", (table_name,))
+    table = cursor.fetchone()
+
+    if table:
+        cursor.execute(f"SELECT * FROM data")
+
+        # Fetch all rows
+        rows = cursor.fetchall()
+
+        conn.close()
+
+        data_list = []
+        for row in rows:
+            data_list.append(list(row))
+
+        return data_list
+
+    else:
+        return
 
 
 def view_species_data(sel_species):
-    info, count = supabase.table("speciesDB").select("*").eq("Species", sel_species).execute()
-    all_data = list(info[1])
+    conn = sqlite3.connect("species.sqlite")
+    cursor = conn.cursor()
+
+    query = f"SELECT * FROM data WHERE species = ?"
+    cursor.execute(query, (sel_species,))
+    rows = cursor.fetchall()
+
+    conn.close()
 
     mlist = []
-    for d in all_data:
-        _, m, _, _, _ = list(d.values())
+    for d in rows:
+        m, _, _, _ = list(d)
         mlist.append(m)
 
     return mlist
@@ -58,6 +74,8 @@ class FileDownloader(object):
 
     def download(self):
         b64 = base64.b64encode(self.data.encode()).decode()
+        timestr = time.strftime("%Y-%m-%d")
+
         new_filename = "{}_{}.csv".format(self.filename, timestr)
 
         href = f'<a href="data:file/csv;base64,{b64}" download="{new_filename}">Click Here!!</a>'
