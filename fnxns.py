@@ -7,7 +7,7 @@ Created on Tue Dec  3 08:26:27 2013
 @author: kalexiou
 """
 
-from supabase_fxns import *
+from sqlite3_fxns import *
 
 
 def detect_duplicate_markers(user_marker, species):
