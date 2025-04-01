@@ -230,7 +230,7 @@ def main():
                                 % (new_marker_list, selected_species.upper())
                             )
                     else:
-                        add_markers(selected_species, new_marker_list, user, timestr, cur)
+                        add_markers(selected_species, new_marker_list, user, timestr, conn)
                         st.success(
                             "Marker(s) %s were added successfully to the %s database"
                             % (new_marker_list, selected_species.upper())

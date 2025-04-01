@@ -47,8 +47,7 @@ def view_species_data(sel_species):
     query = f"SELECT * FROM data WHERE species = ?"
     cursor.execute(query, (sel_species,))
     rows = cursor.fetchall()
-
-    conn.close()
+    # conn.close()
 
     mlist = []
     for d in rows:

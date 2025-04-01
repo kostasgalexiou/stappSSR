@@ -10,6 +10,8 @@ import re
 import numpy as np
 import pandas as pd
 from collections import OrderedDict as od
+import streamlit as st
+import sys
 
 
 def generate_output(dframe, alleles_list):
@@ -36,7 +38,11 @@ def generate_output(dframe, alleles_list):
         for i, col_entry in enumerate(dframe_transp[col].to_list()):
             if not isinstance(col_entry, int) and col_entry != '-':
                 for c in col_entry.split("/"):
-                    new_alleles_list[alleles_dict[dframe_transp.index[i] + '_' + str(c)]] = '1'
+                    try:
+                        new_alleles_list[alleles_dict[dframe_transp.index[i] + '_' + str(c)]] = '1'
+                    except KeyError:
+                        st.warning('Marker %s is not present in the species DB. To proceed, please add the marker into the DB. Exiting...' % (dframe_transp.index[i] + '_' + str(c)))
+                        sys.exit()
             else:
                 if col_entry == "-":
                     #     continue
@@ -48,7 +54,12 @@ def generate_output(dframe, alleles_list):
                             new_alleles_list[alleles_dict[allele]] = '-'
                 else:
                     #     # replace 0 with 1 at the corresponding index of the unique_peak_dict, for the col_entry
-                    new_alleles_list[alleles_dict[dframe_transp.index[i] + '_' + str(col_entry)]] = '1'
+                    try:
+                        new_alleles_list[alleles_dict[dframe_transp.index[i] + '_' + str(col_entry)]] = '1'
+                    except KeyError:
+                        st.warning('Marker %s is not present in the species DB. To proceed, please add the marker into the DB. Exiting...' % (dframe_transp.index[i] + '_' + str(col_entry)))
+                        sys.exit()
+
         binary_list.extend(new_alleles_list)
 
         final_list.append(binary_list)

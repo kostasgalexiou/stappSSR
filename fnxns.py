@@ -28,6 +28,6 @@ def add_markers(species, inlist, username, timestr, connection):
 
     for m in list_w_data_to_insert:
         query = f"INSERT INTO data (markerid, species, person, uploadDate) VALUES (?, ?, ?, ?)"
-        connection.execute(query, tuple(m))
-
+        connection.cursor().execute(query, tuple(m))
+    connection.commit()
     return
