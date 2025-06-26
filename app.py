@@ -38,7 +38,7 @@ def main():
 
     if choice == "About":
         st.markdown(
-            '<h align="center"><font size="5"><mark style="background-color: lightgrey">*SSR '
+            '<h align="center"><font size="8"><mark style="background-color: lightgrey">*SSR '
             "Conversion*</mark> is a streamlit application for converting SRR genotyping "
             "data into a binary format for presence/absence of the marker allele.</font></h>",
             unsafe_allow_html=True,
@@ -46,7 +46,7 @@ def main():
 
     elif choice == "Help":
         st.markdown(
-            '<font size="4">\n\n- Input data is a '
+            '<font size="6">\n\n- Input data is a '
             "<b>comma-separated (CSV)</b> file that can contain 2 types of data, depending on the format conversion "
             "requested by the user:</font>\n\n", unsafe_allow_html=True)
 
