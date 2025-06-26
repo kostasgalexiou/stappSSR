@@ -146,6 +146,47 @@ def main():
                 df.to_csv(index=False),
                 filename="markers_in_database",
             ).download()
+
+            col1, col2 = st.columns([2, 1])
+            
+            with col1:
+                species_input = st.text_input("Enter species to delete from DB (USE WITH CAUTION!!!!):", key="delete_species")
+            
+            with col2:
+                st.markdown("""
+                    <style>
+                    div.stButton > button:first-child {
+                        background-color: crimson;
+                        color: white;
+                        height: 3em;
+                        width: 10em;
+                        border-radius: 10px;
+                        border: none;
+                    }
+                    div.stButton > button:first-child:hover {
+                        background-color: darkred;
+                    }
+                    </style>
+                """, unsafe_allow_html=True)
+            
+                if st.button("Delete species"):
+                    delete_species_from_db(species_to_delete=species_input)
+                    st.text(f"Species '{species_input.upper()}' deleted!")
+            
+            st.text("")
+            
+            col1, col2 = st.columns([2, 1])
+            
+            with col1:
+                delete_all = st.text_input("Type 3 times 'DELETE_DATABASE' (USE WITH EXTREME CAUTION AND AT YOUR OWN RISK!!!!):", key="delete_database")
+        
+            with col2:
+                if st.button("DELETE ENTIRE DATABASE"):
+                    if delete_all == 'DELETE_DATABASE DELETE_DATABASE DELETE_DATABASE':
+                        delete_all_db()
+                        st.text(f"Database is now EMPTY!")
+                    else:
+                        st.warning(f"You have to enter 3 times 'DELETE_DATABASE' in order to delete the entire DB.")
         else:
             st.warning(
                 'No species table available. Please run "Add species and/or markers" from sidebar menu to add a new '
