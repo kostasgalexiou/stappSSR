@@ -30,7 +30,7 @@ def main():
     menu = [
         "About",
         "Species info",
-        "Add species and/or markers",
+        "Add new species and/or markers",
         "Format conversion",
         "Help",
     ]
