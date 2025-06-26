@@ -153,7 +153,7 @@ def main():
             )
             exit(0)
 
-    elif choice == "Add species and/or markers":
+    elif choice == "Add new species and/or markers":
 
         timestr = time.strftime("%Y-%m-%d")
         conn = sqlite3.connect('species.sqlite')
