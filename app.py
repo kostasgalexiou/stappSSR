@@ -69,12 +69,12 @@ def main():
         )
 
         st.markdown(
-            '<font size="5">\n\nTracks</font>\n\n',
+            '<font size="8">\n\nTracks</font>\n\n',
             unsafe_allow_html=True,
         )
 
         st.markdown(
-            '<font size="4">\n\n- "Species info" Track</font>\n\n',
+            '<font size="6">\n\n- "Species info" Track</font>\n\n',
             unsafe_allow_html=True,
         )
         st.markdown(
@@ -83,7 +83,7 @@ def main():
             unsafe_allow_html=True,
         )
         st.markdown(
-            '<font size="4">\n\n- "Add new species and/or markers" Track</font>\n\n',
+            '<font size="6">\n\n- "Add new species and/or markers" Track</font>\n\n',
             unsafe_allow_html=True,
         )
         st.markdown(
@@ -92,7 +92,7 @@ def main():
             unsafe_allow_html=True,
         )
         st.markdown(
-            '<font size="4">\n\n- "Format conversion" Track</font>\n\n',
+            '<font size="6">\n\n- "Format conversion" Track</font>\n\n',
             unsafe_allow_html=True,
         )
         st.markdown(
@@ -102,20 +102,20 @@ def main():
             unsafe_allow_html=True,
         )
         st.markdown(
-            '<font size="5">\n\nData testing</font>\n\n',
+            '<font size="8">\n\nData testing</font>\n\n',
             unsafe_allow_html=True,
         )
         st.markdown(
-            '<font size="4">\n\n- markers_for_species.csv: input file for adding markers into the database.</font>\n\n',
+            '<font size="6">\n\n- markers_for_species.csv: input file for adding markers into the database.</font>\n\n',
             unsafe_allow_html=True,
         )
         st.markdown(
-            '<font size="4">\n\n- numeric_input.csv: input file for passing SSR allele format into a binary '
+            '<font size="46">\n\n- numeric_input.csv: input file for passing SSR allele format into a binary '
             'format.</font>\n\n',
             unsafe_allow_html=True,
         )
         st.markdown(
-            '<font size="4">\n\n- binary_input.csv: input file for passing binary data into an SSR allele '
+            '<font size="6">\n\n- binary_input.csv: input file for passing binary data into an SSR allele '
             'format.</font>\n\n',
             unsafe_allow_html=True,
         )
