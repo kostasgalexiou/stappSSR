@@ -40,7 +40,7 @@ def main():
         st.markdown(
             '<h align="center"><font size="8"><mark style="background-color: lightgrey">*SSR '
             "Conversion*</mark> is a streamlit application for converting SRR genotyping "
-            "data into a binary format for presence/absence of the marker allele.</font></h>",
+            "data into a binary format, for presence/absence of the marker allele, or vice versa.</font></h>",
             unsafe_allow_html=True,
         )
 
@@ -79,12 +79,22 @@ def main():
         )
         st.markdown(
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In this track you can see a table with all the "
-            "marker alleles, grouped by species.",
+            "marker alleles (marker name + '_' + allele size), grouped by species.",
             unsafe_allow_html=True,
         )
         st.markdown(
             '<font size="6">\n\n- "Add new species and/or markers" Track</font>\n\n',
             unsafe_allow_html=True,
+        )
+        st.code(
+            "Marker file example:\n"
+            "cesi98_182\n"
+            "cesi98_185\n"
+            "cesi98_191\n"
+            "cesi976_271\n"
+            "cesi976_273\n"
+            "cesi17_190\n"
+            "cesi17_193\n"
         )
         st.markdown(
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;User can either add a new species, "
