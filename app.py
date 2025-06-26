@@ -86,8 +86,8 @@ def main():
             '<font size="6">\n\n- "Add new species and/or markers" Track</font>\n\n',
             unsafe_allow_html=True,
         )
+        st.text("Marker file example:")
         st.code(
-            "Marker file example:\n"
             "cesi98_182\n"
             "cesi98_185\n"
             "cesi98_191\n"
