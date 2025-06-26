@@ -57,6 +57,23 @@ def view_species_data(sel_species):
     return mlist
 
 
+def delete_species_from_db(species_to_delete):
+
+    conn = sqlite3.connect("species.sqlite")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM data WHERE species = ?", (species_to_delete,))
+    conn.commit()
+    conn.close()
+
+
+def delete_all_db():
+    conn = sqlite3.connect("species.sqlite")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM data")
+    conn.commit()
+    conn.close()
+
+
 class FileDownloader(object):
     """docstring for FileDownloader
     >>> download = FileDownloader(data,filename).download()
